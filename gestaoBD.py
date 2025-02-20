@@ -6,8 +6,8 @@ def criarTabela():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL
-            email TEXT NOT NULL
+            nome TEXT NOT NULL,
+            email TEXT NOT NULL,
             senha TEXT NOT NULL
         )
     ''')
@@ -52,3 +52,14 @@ def recuperarSenhaBD(nome, email):
     senha = cursor.fetchone()
     conn.close()
     return senha
+
+def listarUsuarios():
+    conn = sqlite.connect('gestaoDB.sqlite')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM usuarios order by id desc')
+    dados = cursor.fetchall()
+    usuarios = []
+    for dado in dados:
+        usuarios.append(dado)
+    conn.close()
+    return usuarios

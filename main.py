@@ -11,21 +11,19 @@ usuarios = []
 def login():
     return render_template("login.html")
 
-@app.route("/cadastro")
+@app.route("/cadastro", methods=['GET', 'POST'])
 def cadastro():
+    if request.method == "POST":
+        nome = request.form.get("nome")
+        email = request.form.get("email")
+        senha = str(request.form.get("senha"))
+        if(gestaoBD.verificarUsuario(email)==False):
+            gestaoBD.inserirUsuario(nome, email, senha)
+            # flash("Cadastro realizado com sucesso! Faça login.", "sucess")
+            return render_template("login.html")
     return render_template("cadastro.html")
 
-@app.route("/cadastrarUsuario", methods=["POST"])
-def cadastrarUsuario():
-    nome = request.form.get("nome")
-    email = request.form.get("email")
-    senha = str(request.form.get("senha"))
-    if(gestaoBD.verificarUsuario(email)==False):
-        gestaoBD.inserirUsuario(nome, email, senha)
-        flash("Cadastro realizado com sucesso! Faça login.", "sucess")
-        return render_template("login.html")
-    else:
-        return render_template("cadastro.html")
+
 
 @app.route("/autenticarUsuaruio", methods=["POST"])
 def autenticar():
@@ -43,6 +41,11 @@ def autenticar():
 @app.route("/todo-list")
 def todolist():
     return render_template("todo-list.html")
+
+def listarUsuarios():
+    #return render_template("lista.html", lista=lista_usuarios)
+    lista_usuariosDB = gestaoBD.listarUsuarios()
+    return render_template("lista.html", lista=lista_usuariosDB)
 
 app.run(debug=True)
 
