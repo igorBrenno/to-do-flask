@@ -4,6 +4,7 @@ import gestaoBD
 app = Flask(__name__)
 
 gestaoBD.criarTabela()
+app.secret_key = "GeeksForGeeks"
 
 usuarios = []
 
@@ -19,15 +20,13 @@ def cadastro():
         senha = str(request.form.get("senha"))
         if(gestaoBD.verificarUsuario(email)==False):
             gestaoBD.inserirUsuario(nome, email, senha)
-            # flash("Cadastro realizado com sucesso! Faça login.", "sucess")
+            flash("Cadastro realizado com sucesso! Faça login.", "sucess")
             return render_template("login.html")
     return render_template("cadastro.html")
 
-
-
-@app.route("/autenticarUsuaruio", methods=["POST"])
+@app.route("/autenticarUsuario", methods=["POST", "GET"])
 def autenticar():
-    email = request.form.get("emal")
+    email = request.form.get("email")
     senha = str(request.form.get("senha"))
 
     logado = gestaoBD.login(email, senha)
