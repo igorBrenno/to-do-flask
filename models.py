@@ -19,4 +19,5 @@ class Todo(UserMixin, db.Model):
     tarefa = db.Column(db.String(200))
     status = db.Column(db.Boolean, default=False)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('Usuario.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    

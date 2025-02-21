@@ -62,7 +62,7 @@ def logout():
 def add():
     todo = request.form['todo']
     
-    nova_tarefa = Todo(tarefa=todo, status=False)
+    nova_tarefa = Todo(tarefa=todo, status=False, user_id=current_user.id)
     db.session.add(nova_tarefa)
     db.session.commit()
     return redirect(url_for('home'))
