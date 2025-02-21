@@ -41,4 +41,4 @@ O projeto é open-source e qualquer contribuição é bem-vinda. Se você deseja
 O projeto é licenciado sob a licença MIT. Veja o arquivo `LICENSE` para mais informações.
 
 **Contato:**
-Se você tiver alguma dúvida ou precisar de ajuda, por favor, entre em contato comigo através do endereço de e-mail `igorbrennodantas@gmail.com`, `igorbrennodantas@gmail.com`.
+Se você tiver alguma dúvida ou precisar de ajuda, por favor, entre em contato comigo através do endereço de e-mail `igorbrennodantas@gmail.com`, `marcelo-oliveira-mo@academico.ifpb.edu.br`
