@@ -13,10 +13,12 @@
     <ul>
       {% for todo in todos %}
         <li>
-          <input type="checkbox" name="done" {% if todo['done'] %}checked{% endif %} onchange="this.form.submit()">
-          <span {% if todo['done'] %}style="text-decoration: line-through"{% endif %}>{{ todo.tarefa }}</span>
-          <a href="{{ url_for('edit', index=loop.index0) }}">edit</a>
-          <a href="{{ url_for('delete', index=loop.index0) }}">delete</a>
+          <form action="/check/{{ todo.id }}" method="get">
+            <input type="checkbox" name="feito" {% if todo.status %}checked{% endif %} onchange="this.form.submit()">
+          </form>
+          <span {% if todo['status'] %}style="text-decoration: line-through"{% endif %}>{{ todo.tarefa }}</span>
+          <a href="{{ url_for('edit', index=todo.id) }}">edit</a>
+          <a href="{{ url_for('delete', index=todo.id) }}">delete</a>
         </li>
       {% endfor %}
     </ul>
@@ -24,5 +26,19 @@
       <input type="text" name="todo">
       <button type="submit">Add</button>
     </form>
+
+
+    <!-- <script>
+      const checkboxes = document.querySelectorAll('input[name="feito"]');
+
+      if (checkboxes.length > 0) {
+        alert("oi")
+        // fetch('/update', {
+        //   method: 'POST',
+        //   body: JSON.stringify({ feitos: Array.from(checkboxes).map(checkbox => checkbox.checked) })
+        // });
+      }
+
+    </script> -->
   </body>
 </html>

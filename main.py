@@ -19,7 +19,7 @@ def user_loader(id):
 @login_required
 # login_required Faz com que só possa acessar essa rota quando estiver logado
 def home():
-    todos = db.session.query(Todo).all()
+    todos = db.session.query(Todo).filter_by(user_id=current_user.id).all()
     return render_template('home.html', todos=todos)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -69,10 +69,11 @@ def add():
 
 @app.route('/edit/<int:index>', methods=['GET', 'POST'])
 def edit(index):
-    todo = db.session.query(Todo).filter_by(id=index)
+    todo = db.session.query(Todo).filter_by(id=index).first()
+    print(todo)
     if request.method == 'POST':
         info = str(request.form['edit-todo'])
-        todo.update({'tarefa' : info})
+        todo.tarefa = info
         db.session.commit()
         return redirect(url_for('home'))
     else:
@@ -80,9 +81,12 @@ def edit(index):
 
 @app.route('/check/<int:index>')
 def check(index):
+    print("CHeck")
     todo = db.session.query(Todo).filter_by(id=index).first()
+    print(todo)
     if todo:
-        todo.done = not todo.done
+        todo.status = not todo.status
+        db.session.commit()
     return redirect(url_for('home'))
 
 @app.route('/delete/<int:index>')
@@ -94,6 +98,7 @@ def delete(index):
         return redirect(url_for('home'))
     else:
         return "Todo não encontrado"
+
 
 if __name__ == '__main__':
     with app.app_context():
