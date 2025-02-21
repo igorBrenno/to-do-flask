@@ -1,50 +1,101 @@
-from flask import Flask, render_template, request, flash
-import gestaoBD
+from flask import Flask, render_template, redirect, request, url_for
+from models import Usuario, Todo
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from db import db
 
 app = Flask(__name__)
+app.secret_key = 'fodameno'
+lm = LoginManager(app)
+lm.login_view = 'login'
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
+db.init_app(app)
 
-gestaoBD.criarTabela()
-app.secret_key = "GeeksForGeeks"
+@lm.user_loader
+def user_loader(id):
+    usuario = db.session.query(Usuario).filter_by(id=id).first()
+    return usuario
 
-usuarios = []
+@app.route('/')
+@login_required
+# login_required Faz com que só possa acessar essa rota quando estiver logado
+def home():
+    todos = db.session.query(Todo).all()
+    return render_template('home.html', todos=todos)
 
-@app.route("/")
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template("login.html")
+    if request.method == 'GET':
+        return render_template('login.html')
+    elif request.method == 'POST':
+        email = request.form['email']
+        senha = request.form['senha']
 
-@app.route("/cadastro", methods=['GET', 'POST'])
-def cadastro():
-    if request.method == "POST":
-        nome = request.form.get("nome")
-        email = request.form.get("email")
-        senha = str(request.form.get("senha"))
-        if(gestaoBD.verificarUsuario(email)==False):
-            gestaoBD.inserirUsuario(nome, email, senha)
-            flash("Cadastro realizado com sucesso! Faça login.", "sucess")
-            return render_template("login.html")
-    return render_template("cadastro.html")
+        user = db.session.query(Usuario).filter_by(email=email, senha=senha).first()
+        if not user:
+            return 'Nome ou senha incorretos.'
+        login_user(user)
+        return redirect(url_for('home'))
+@app.route('/registrar', methods=['GET', 'POST'])
+def registrar():
+    if request.method == 'GET':
+        return render_template('registrar.html')
+    elif request.method == 'POST':
+        nome = request.form['nome']
+        email = request.form['email']
+        senha = request.form['senha']
 
-@app.route("/autenticarUsuario", methods=["POST", "GET"])
-def autenticar():
-    email = request.form.get("email")
-    senha = str(request.form.get("senha"))
+        novo_usuario = Usuario(nome=nome, email=email, senha=senha)
+        db.session.add(novo_usuario)
+        db.session.commit()
 
-    logado = gestaoBD.login(email, senha)
-    if (logado == True):
-        return render_template("todo-list.html")
+        login_user(novo_usuario)
+
+        return redirect(url_for('home'))
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
+@app.route('/add', methods=['POST'])
+def add():
+    todo = request.form['todo']
+    
+    nova_tarefa = Todo(tarefa=todo, status=False)
+    db.session.add(nova_tarefa)
+    db.session.commit()
+    return redirect(url_for('home'))
+
+@app.route('/edit/<int:index>', methods=['GET', 'POST'])
+def edit(index):
+    todo = db.session.query(Todo).filter_by(id=index)
+    if request.method == 'POST':
+        info = str(request.form['edit-todo'])
+        todo.update({'tarefa' : info})
+        db.session.commit()
+        return redirect(url_for('home'))
     else:
-        flash("Email ou senha incorretos", "danger")
-        return render_template("login.html")
+        return render_template('edit.html', todo=todo, index=index)
 
+@app.route('/check/<int:index>')
+def check(index):
+    todo = db.session.query(Todo).filter_by(id=index).first()
+    if todo:
+        todo.done = not todo.done
+    return redirect(url_for('home'))
 
-@app.route("/todo-list")
-def todolist():
-    return render_template("todo-list.html")
+@app.route('/delete/<int:index>')
+def delete(index):
+    todo = db.session.query(Todo).filter_by(id=index).first()
+    if todo:
+        db.session.delete(todo)
+        db.session.commit()
+        return redirect(url_for('home'))
+    else:
+        return "Todo não encontrado"
 
-def listarUsuarios():
-    #return render_template("lista.html", lista=lista_usuarios)
-    lista_usuariosDB = gestaoBD.listarUsuarios()
-    return render_template("lista.html", lista=lista_usuariosDB)
-
-app.run(debug=True)
-
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
