@@ -20,7 +20,7 @@ def user_loader(id):
 # login_required Faz com que só possa acessar essa rota quando estiver logado
 def home():
     todos = db.session.query(Todo).filter_by(user_id=current_user.id).all()
-    return render_template('home.html', todos=todos)
+    return render_template('home.html', todos=todos, user=current_user)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
